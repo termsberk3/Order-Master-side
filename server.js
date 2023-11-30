@@ -1,12 +1,13 @@
 const express = require('express');
 const mongoose = require('mongoose');
+var amqp = require('amqplib/callback_api');
 const option = {
     socketTimeoutMS: 30000,
 };
 const app = express();
 const port = 3001
 
-const Product = require('./models/productModel')
+const Product = require('./api/models/orderModel')
 app.use(express.json());
 
 //DB Connection
@@ -16,6 +17,14 @@ mongoose.connect('mongodb+srv://username:password@homework-cluster.tilf3zg.mongo
 }, function(err) {
   console.log(err)
 });
+
+//RabbitMQ Connection
+async function connectRabbitMQ() {
+    const amqpServer = "amqp://localhost:5672";
+    connection = await amqp.connect(amqpServer);
+    channel = await connection.createChannel();
+    await channel.assertQeue("ORDER")
+}
 
 //routes
 app.get('/', (req,res)=> {
